@@ -1,11 +1,11 @@
 package main
 
 import (
+	freightQuoter "github.com/guilhermesiani/go-grpc/freight_quoter"
 	"log"
 	"net"
 
 	"google.golang.org/grpc"
-	"github.com/guilhermesiani/go-grpc/chat"
 )
 
 func main() {
@@ -14,11 +14,11 @@ func main() {
 		log.Fatalf("Failed to listen on port 9000: %v", err)
 	}
 
-	s := chat.Server{}
+	s := freightQuoter.Server{}
 
 	grpcServer := grpc.NewServer()
 
-	chat.RegisterChatServiceServer(grpcServer, &s)
+	freightQuoter.RegisterFreightQuoterServer(grpcServer, &s)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve gRPC server over port 9000: %v", err)

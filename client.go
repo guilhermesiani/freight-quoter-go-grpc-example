@@ -5,7 +5,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/guilhermesiani/go-grpc/chat"
+	freightQuoter "github.com/guilhermesiani/go-grpc/freight_quoter"
 )
 
 func main() {
@@ -16,16 +16,35 @@ func main() {
 	}
 	defer conn.Close()
 
-	c := chat.NewChatServiceClient(conn)
+	c := freightQuoter.NewFreightQuoterClient(conn)
 
-	message := chat.Message{
-		Body: "Hello from the client!",
+	var items []*freightQuoter.Item
+	items = append(items, &freightQuoter.Item{
+		Quantity: 1,
+		Price: 2,
+		Width: 3,
+		Height: 4,
+		Length: 5,
+	})
+
+	toPackage := freightQuoter.ToPackage{
+		Items: items,
 	}
 
-	response, err := c.SayHello(context.Background(), &message)
+	packg, err := c.MountPackage(context.Background(), &toPackage)
 	if err != nil {
-		log.Fatalf("Error when calling SayHello: %s", err)
+		log.Fatalf("Error when calling MountPackage: %s", err)
 	}
 
-	log.Printf("Response from Server: %s", response.Body)
+	log.Printf("Package Response from Server: %s", packg)
+
+	delivery, err := c.Quote(context.Background(), &freightQuoter.Quotation{
+		Package: packg,
+		ZipCode: "13607222",
+	})
+	if err != nil {
+		log.Fatalf("Error when calling Quote: %s", err)
+	}
+
+	log.Printf("Delivery Response from Server: %s", delivery)
 }
